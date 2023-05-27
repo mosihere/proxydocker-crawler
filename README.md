@@ -2,6 +2,12 @@
 
 a crawler for proxydocker.com
 
+### Definition
+
+This crawler find and grab latest proxies from proxydocker.com website
+with proxies informations contains ip, port, country, code, lastCheck and ...
+finnaly commit them in a Mongo Data Base.
+
 ### Usage:
 
 1. create a virtual environment
