@@ -14,7 +14,7 @@ a crawler for proxydocker.com
 
 3. install requirements.txt
 
-`$ python -m pip install`
+`$ python -m pip install -r requirements.txt`
 
 4. You need a **mongo-db server**. create it and replace database info with yours.
 
