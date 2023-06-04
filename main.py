@@ -1,7 +1,7 @@
 import time
 import requests
 import threading
-from dal import CreateDataBase
+from dal import DataBaseManager
 from api import API_URL, cookies, header, data
 
 
@@ -66,32 +66,25 @@ class ProxyExtractor:
                 self.list_of_data.append(proxy_data)
 
         return self.list_of_data
-    
-    def commit(self):
-        """
-        Create a Collection and Insert data to that.
-        """
 
-        dbname = CreateDataBase().get_database('MyDB')
-        collection_name = dbname["proxies"]
-        print(dbname)
-
-        collection_name.insert_many(self.list_of_data)
-        
 
 
 if __name__ == "__main__":
     my_extractor = ProxyExtractor()
+    db_manager = DataBaseManager()
 
     pages_to_crawl = int(input('++Each page contains 20 proxies++\nHow many pages you wanna crawl: '))
     
     t1 = threading.Thread(target=my_extractor.proxy_extractor, args=(pages_to_crawl, ))
-    t2 = threading.Thread(target=my_extractor.commit)
 
     t1.start()
     t1.join()
 
+    data = my_extractor.proxy_extractor(pages_to_crawl)
+
+    t2 = threading.Thread(target=db_manager.commit, args=(data, ))
     t2.start()
+    
     t2.join()
 
     print()
