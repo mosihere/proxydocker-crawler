@@ -3,11 +3,11 @@ API_URL = 'https://www.proxydocker.com/en/api/proxylist/'
 
 header = {
     'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/113.0',
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
 }
 
 data = {
-    'token': 'K1YSGkJtrrH1ungontd5IJ4d-9V2dI7uBN556ML76VU',
+    'token': 'mjpg5c_1vSeDHHNNpDz8tSkE3AK1o8Vsb6DvBP90OWA',
     'country': "all",
     'city':	"all",
     'state': "all",
@@ -19,5 +19,5 @@ data = {
 }
 
 cookies = {
-    'PHPSESSID': "77nsbm0i0ernptoqg9rrsa18e9",
+    'PHPSESSID': "qv3hc9i7iavtredlm6fdgpf5jo",
 }
