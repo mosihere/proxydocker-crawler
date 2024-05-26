@@ -1,42 +1,46 @@
-from pymongo import MongoClient
 import os
+from typing import List, Dict
+from pymongo import MongoClient
 
 
-class DataBaseManager:
+
+def db_connection(database_name: str) -> MongoClient:
     """
-    When instantiate Mongo Password will read from environment variables.
-    Need a single argument as db_name.
+    Get a single arg as database_name
+    read database password from environment variables and returns a MongoClient Connection
+
+    Args:
+        database_name: str
+
+    Returns
+        MongoClient() Connection.
     """
+    db_pass = os.environ.get('MONGODB_PASS')
 
-    def __init__(self) -> None:
-        self.password = os.environ['MONGODB_PASS']
+    CONNECTION_STRING = f"mongodb+srv://mosihere:{db_pass}@mostafa.q0repad.mongodb.net/?retryWrites=true&w=majority"
 
-    def __get_database(self, db_name: str) -> MongoClient:
-        """
-        Connect to Mongo and Create a database named "myDB"
+    # Create a connection using MongoClient.
+    client = MongoClient(CONNECTION_STRING)
 
-        Returns:
-            Created DataBase
+    return client[database_name]
 
-        ReturnType: MongoClient
-        """
-        db_name = db_name
 
-        CONNECTION_STRING = f"mongodb+srv://mosihere:{self.password}@mostafa.q0repad.mongodb.net/?retryWrites=true&w=majority"
+def commit(data: List[Dict]) -> str:
+    """
+    Get a single arg as data
+    Create a Database called MyDB
+    Create a Collection named proxies
+    finally insert data to proxies collection.
 
-        # Create a connection using MongoClient.
-        client = MongoClient(CONNECTION_STRING)
+    Args:
+        data: List[Dict]
 
-        # Create the database
-        return client[db_name]
-    
-    def commit(self, data: list):
-        """
-        Create a Collection and Insert data to that.
-        """
+    Returns
+        Collection
+    """
+    # Create the database
+    database = db_connection('MyDB')
 
-        dbname = self.__get_database('MyDB')
-        collection_name = dbname["proxies"]
-        print(dbname)
-
-        return collection_name.insert_many(data)
+    # Create the collection
+    collection = database["proxies"]
+    collection.insert_many(data)
