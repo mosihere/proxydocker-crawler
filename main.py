@@ -1,91 +1,72 @@
 import time
-import requests
-import threading
-from dal import DataBaseManager
+import asyncio
+import aiohttp
+from dal import commit
+from typing import Dict, List
 from api import API_URL, cookies, header, data
 
 
-class ProxyExtractor:
+async def send_request(session: aiohttp.ClientSession, url: str, page: int) -> List[Dict]:
+    """
+    Send a POST request to specified URL
+    and return List of proxy dictionaries.
 
-    def __init__(self) -> None:
-        self.list_of_data = list()
+    Args:
+        session: aiohttp.ClientSession
+        url: str
+        page: int
+
+    Returns:
+        List[Dict]
+    """
+    data['page'] = str(page)
+    async with session.post(url, headers=header, data=data, cookies=cookies) as response:
+        proxy_info = await response.json()
+        return proxy_info['proxies']
 
 
-    def __send_request(self, url: str) -> dict:
-        """
-        Send a POST request to specified URL
-        and return Dictionary Object.
+async def get_proxy_info(url: str, pages: int) -> List[Dict]:
+    async with aiohttp.ClientSession() as session:
+        tasks = [send_request(session, url, page) for page in range(1, pages + 1)]
+        return await asyncio.gather(*tasks)
 
-        Args:
-            url: str
-        
-        Returns:
-            Dictionary object contains api Response.
 
-        ReturnType:
-            Dictionary
-        """
+def proxy_normalizer(proxy_info: List[Dict]) -> List[Dict]:
+    """
+    Normalize proxy information.
 
-        response = requests.post(url, headers=header, data=data, cookies=cookies)
-        dictionary_info = response.json()
-        return dictionary_info
-    
-    def proxy_extractor(self, page_numbers: int) -> list:
-        """
-        Iterate over Pages of Website
-        and Get important data and save them
-        in a Dictionary Object and finally append them
-        in a list.
+    Args:
+        proxy_info: List[Dict]
 
-        Args:
-            page_numbers: int
+    Returns:
+        List[Dict]
+    """
+    normalized_data = []
+    for _ in proxy_info:
+        for proxy in _:
+            proxy_data = {
+                'country': proxy.get('country'),
+                'ip': proxy.get('ip'),
+                'port': proxy.get('port'),
+                'timeout': proxy.get('timeout'),
+                'code': proxy.get('code'),
+                'city': proxy.get('city'),
+                'lastcheck': proxy.get('lastcheck')
+            }
+            normalized_data.append(proxy_data)
+    return normalized_data
 
-        Returns:
-            list_of_data
 
-        ReturnType:
-            List
-        """
-
-        proxy_info = self.__send_request(API_URL)
-
-        for page in range(1, page_numbers + 1):
-            data['page'] = str(page + 1)
-            time.sleep(4)
-
-            for proxy in proxy_info['proxies']:
-                proxy_data = {
-                    'country': proxy.get('country'),
-                    'ip': proxy.get('ip'),
-                    'port': proxy.get('port'),
-                    'timeout': proxy.get('timeout'),
-                    'code': proxy.get('code'),
-                    'city': proxy.get('city'),
-                    'lastcheck': proxy.get('lastcheck')
-                }
-                self.list_of_data.append(proxy_data)
-
-        return self.list_of_data
-
+async def main():
+    pages = int(input('How many pages you wanna crawl? Each page contains 20 proxies: '))
+    start = time.time()
+    proxy_info = await get_proxy_info(API_URL, pages)
+    normalized_info = proxy_normalizer(proxy_info)
+    commit(normalized_info)
+    end = time.time()
+    consumed_time = end - start
+    print(f'Consumed time for {pages} pages: {consumed_time} seconds\n{pages * 20} proxies crawled successfully.')
 
 
 if __name__ == "__main__":
-    my_extractor = ProxyExtractor()
-    db_manager = DataBaseManager()
-
-    pages_to_crawl = int(input('++Each page contains 20 proxies++\nHow many pages you wanna crawl: '))
-    
-    t1 = threading.Thread(target=my_extractor.proxy_extractor, args=(pages_to_crawl, ))
-
-    t1.start()
-    t1.join()
-
-    data = my_extractor.proxy_extractor(pages_to_crawl)
-
-    t2 = threading.Thread(target=db_manager.commit, args=(data, ))
-    t2.start()
-    
-    t2.join()
-
-    print()
-    print('Done')
+    asyncio.run(main())
