@@ -8,7 +8,7 @@ dnspython==2.6.1
 exceptiongroup==1.1.1
 frozenlist==1.4.1
 h11==0.14.0
-idna==3.4
+idna==3.7
 multidict==6.0.5
 outcome==1.2.0
 pymongo==4.6.3
