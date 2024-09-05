@@ -11,7 +11,7 @@ h11==0.14.0
 idna==3.4
 multidict==6.0.5
 outcome==1.2.0
-pymongo==4.3.3
+pymongo==4.6.3
 PySocks==1.7.1
 requests==2.32.2
 sniffio==1.3.0
